@@ -42,8 +42,6 @@ public class EndermanSpawner extends AbstractEntitySpawner {
             result = SpawnResult.WRONG_BLOCK;
         } else if (blockLightLevel > 7) { // lightlevel not working for now, but as lightlevel is always zero that should work
             result = SpawnResult.WRONG_LIGHTLEVEL;
-            /*} else if (biomeId != Biome.HELL) {
-            result = SpawnResult.WRONG_BLOCK;*/
         } else if (pos.y > 127 || pos.y < 1 || level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z) == Block.AIR) { // cannot spawn on AIR block
             result = SpawnResult.POSITION_MISMATCH;
         } else if (time > 13184 && time < 22800) {

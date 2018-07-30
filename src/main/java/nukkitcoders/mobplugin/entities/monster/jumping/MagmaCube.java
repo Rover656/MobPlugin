@@ -52,6 +52,7 @@ public class MagmaCube extends WalkingMonster {
         super.initEntity();
 
         this.setDamage(new float[] { 0, 2, 3, 4 });
+        this.fireProof = true;
     }
 
     public void attackEntity(Entity player) {

@@ -2,12 +2,19 @@ package nukkitcoders.mobplugin.entities;
 
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockNetherPortal;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.EntityRideable;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 import cn.nukkit.event.entity.EntityMotionEvent;
+import cn.nukkit.event.entity.EntityPortalEnterEvent;
+import cn.nukkit.event.entity.EntityPortalEnterEvent.PortalType;
+import cn.nukkit.level.EnumLevel;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.NukkitMath;
@@ -15,7 +22,9 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
 import cn.nukkit.potion.Effect;
+import cn.nukkit.scheduler.Task;
 import co.aikar.timings.Timings;
+import co.aikar.timings.TimingsHistory;
 import nukkitcoders.mobplugin.MobPlugin;
 import nukkitcoders.mobplugin.entities.monster.Monster;
 import java.util.ArrayList;
@@ -270,20 +279,29 @@ public abstract class BaseEntity extends EntityCreature {
         }
     }
 
-    /*@Override
+    @Override
     public boolean entityBaseTick(int tickDiff) {
+        Timings.entityBaseTickTimer.startTiming();
 
-        Timings.entityMoveTimer.startTiming();
-
-        if (this.despawnEntities && this.age > this.despawnTicks) {
-            this.close();
-            return true;
+        if (!this.isPlayer) {
+            this.blocksAround = null;
+            this.collisionBlocks = null;
         }
-
-        boolean hasUpdate = false;
-
-        this.blocksAround = null;
         this.justCreated = false;
+
+        if (!this.isAlive()) {
+            this.removeAllEffects();
+            this.despawnFromAll();
+            if (!this.isPlayer) {
+                this.close();
+            }
+            Timings.entityBaseTickTimer.stopTiming();
+            return false;
+        }
+        if (riding != null && !riding.isAlive() && riding instanceof EntityRideable) {
+            ((EntityRideable) riding).mountEntity(this);
+        }
+        
 
         if (!this.effects.isEmpty()) {
             for (Effect effect : this.effects.values()) {
@@ -298,44 +316,31 @@ public abstract class BaseEntity extends EntityCreature {
             }
         }
 
+        boolean hasUpdate = false;
+
         this.checkBlockCollision();
 
-        if (this.isInsideOfSolid()) {
-            hasUpdate = true;
-            this.attack(new EntityDamageEvent(this, EntityDamageEvent.DamageCause.SUFFOCATION, 1));
-        }
-
         if (this.y <= -16 && this.isAlive()) {
+            this.attack(new EntityDamageEvent(this, DamageCause.VOID, 10));
             hasUpdate = true;
-            this.attack(new EntityDamageEvent(this, EntityDamageEvent.DamageCause.VOID, 10));
         }
-
 
         if (this.fireTicks > 0) {
             if (this.fireProof) {
-                this.fireTicks -= 4 * tickDiff;
+                this.fireTicks = 0;
             } else {
-                if (!this.hasEffect(Effect.FIRE_RESISTANCE) && (this.fireTicks % 20) == 0 || tickDiff > 20) {
-                    EntityDamageEvent ev = new EntityDamageEvent(this, EntityDamageEvent.DamageCause.FIRE_TICK, 1);
-                    this.attack(ev);
+                if (!this.hasEffect(Effect.FIRE_RESISTANCE) && ((this.fireTicks % 20) == 0 || tickDiff > 20)) {
+                    this.attack(new EntityDamageEvent(this, DamageCause.FIRE_TICK, 1));
                 }
                 this.fireTicks -= tickDiff;
             }
-
+            
             if (this.fireTicks <= 0) {
                 this.extinguish();
             } else {
                 this.setDataFlag(DATA_FLAGS, DATA_FLAG_ONFIRE, true);
                 hasUpdate = true;
             }
-        }
-
-        if (this.moveTime > 0) {
-            this.moveTime -= tickDiff;
-        }
-
-        if (this.attackTime > 0) {
-            this.attackTime -= tickDiff;
         }
 
         if (this.noDamageTicks > 0) {
@@ -345,13 +350,41 @@ public abstract class BaseEntity extends EntityCreature {
             }
         }
 
+        if (this.inPortalTicks == 80) {
+            EntityPortalEnterEvent ev = new EntityPortalEnterEvent(this, PortalType.NETHER);
+            getServer().getPluginManager().callEvent(ev);
+
+            Position newPos = EnumLevel.moveToNether(this);
+            if (newPos != null) {
+                for (int x = -1; x < 2; x++) {
+                    for (int z = -1; z < 2; z++) {
+                        int chunkX = (newPos.getFloorX() >> 4) + x,
+                                chunkZ = (newPos.getFloorZ() >> 4) + z;
+                        FullChunk chunk = newPos.level.getChunk(chunkX, chunkZ, false);
+                        if (chunk == null || !(chunk.isGenerated() || chunk.isPopulated())) {
+                            newPos.level.generateChunk(chunkX, chunkZ, true);
+                        }
+                    }
+                }
+                this.teleport(newPos.add(1.5, 1, 0.5));
+                server.getScheduler().scheduleDelayedTask(new Task() {
+                    @Override
+                    public void onRun(int currentTick) {
+                        //dirty hack to make sure chunks are loaded and generated before spawning player
+                        teleport(newPos.add(1.5, 1, 0.5));
+                        BlockNetherPortal.spawnPortal(newPos);
+                    }
+                }, 20);
+            }
+        }
+
         this.age += tickDiff;
         this.ticksLived += tickDiff;
+        TimingsHistory.activatedEntityTicks++;
 
-        Timings.entityMoveTimer.stopTiming();
-
+        Timings.entityBaseTickTimer.stopTiming();
         return hasUpdate;
-    }*/
+    }
 
     @Override
     public boolean isInsideOfSolid() {

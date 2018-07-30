@@ -30,13 +30,16 @@ public class SpiderSpawner extends AbstractEntitySpawner {
         int blockId = level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z);
         int blockLightLevel = level.getBlockLightAt((int) pos.x, (int) pos.y, (int) pos.z);
         int time = level.getTime() % Level.TIME_FULL;
-
+        int biomeId = level.getBiomeId((int) pos.x, (int) pos.z);
+        
         if (!Block.solid[blockId]) { // only spawns on solid blocks
             result = SpawnResult.WRONG_BLOCK;
         } else if (blockLightLevel > 7) { // lightlevel not working for now, but as lightlevel is always zero that should work
             result = SpawnResult.WRONG_LIGHTLEVEL;
         } else if (pos.y > 127 || pos.y < 1 || level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z) == Block.AIR) { // cannot spawn on AIR block
             result = SpawnResult.POSITION_MISMATCH;
+        } else if (biomeId == 8) { //HELL
+            result = SpawnResult.WRONG_BLOCK;
         } else if (time > 13184 && time < 22800) {
             this.spawnTask.createEntity(getEntityName(), pos.add(0, 2.12, 0));
         }

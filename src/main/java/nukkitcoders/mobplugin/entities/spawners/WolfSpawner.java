@@ -39,6 +39,8 @@ public class WolfSpawner extends AbstractEntitySpawner {
             result = SpawnResult.POSITION_MISMATCH;
         } else if (Block.transparent[blockId]) { // only spawns on opaque blocks
             result = SpawnResult.WRONG_BLOCK;
+        } else if (biomeId == 8) { //HELL
+            result = SpawnResult.WRONG_BLOCK;
         } else {
             this.spawnTask.createEntity(getEntityName(), pos.add(0, 1.9, 0));
         }

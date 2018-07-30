@@ -29,13 +29,16 @@ public class ChickenSpawner extends AbstractEntitySpawner {
 
         int blockId = level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z);
         int blockLightLevel = level.getBlockLightAt((int) pos.x, (int) pos.y, (int) pos.z);
-
+        int biomeId = level.getBiomeId((int) pos.x, (int) pos.z);
+        
         if (blockId != Block.GRASS) { // only spawns on gras
             result = SpawnResult.WRONG_BLOCK;
 //        } else if (blockLightLevel < 9) { // uncommented because lightlevel doesn't work now
 //            result = SpawnResult.WRONG_LIGHTLEVEL;
         } else if (pos.y > 127 || pos.y < 1 || level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z) == Block.AIR) { // cannot spawn on AIR block
             result = SpawnResult.POSITION_MISMATCH;
+        } else if (biomeId == 8) { //HELL
+            result = SpawnResult.WRONG_BLOCK;
         } else {
             this.spawnTask.createEntity(getEntityName(), pos.add(0, 1.7, 0));
         }
