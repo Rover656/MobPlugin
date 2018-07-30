@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import nukkitcoders.mobplugin.entities.animal.swimming.Cod;
 
 
 public class AutoSpawnTask implements Runnable {
@@ -66,6 +67,7 @@ public class AutoSpawnTask implements Runnable {
         entitySpawners.add(new BatSpawner(this, this.pluginConfig));
         entitySpawners.add(new BlazeSpawner(this, this.pluginConfig));
         entitySpawners.add(new ChickenSpawner(this, this.pluginConfig));
+        entitySpawners.add(new CodSpawner(this, this.pluginConfig));
         entitySpawners.add(new CowSpawner(this, this.pluginConfig));
         entitySpawners.add(new CreeperSpawner(this, this.pluginConfig));
         entitySpawners.add(new EndermanSpawner(this, this.pluginConfig));
@@ -74,6 +76,7 @@ public class AutoSpawnTask implements Runnable {
         entitySpawners.add(new HuskSpawner(this, this.pluginConfig));
         entitySpawners.add(new MooshroomSpawner(this, this.pluginConfig));
         entitySpawners.add(new OcelotSpawner(this, this.pluginConfig));
+        entitySpawners.add(new ParrotSpawner(this, this.pluginConfig));
         entitySpawners.add(new PigSpawner(this, this.pluginConfig));
         entitySpawners.add(new PolarBearSpawner(this, this.pluginConfig));
         entitySpawners.add(new RabbitSpawner(this, this.pluginConfig));
@@ -89,6 +92,7 @@ public class AutoSpawnTask implements Runnable {
         maxSpawns.put(Bat.NETWORK_ID, this.pluginConfig.getInt("max-spawns.bat", 0));
         maxSpawns.put(Blaze.NETWORK_ID, this.pluginConfig.getInt("max-spawns.blaze", 0));
         maxSpawns.put(Chicken.NETWORK_ID, this.pluginConfig.getInt("max-spawns.chicken", 0));
+        maxSpawns.put(Cod.NETWORK_ID, this.pluginConfig.getInt("max-spawns.cod", 0));
         maxSpawns.put(Cow.NETWORK_ID, this.pluginConfig.getInt("max-spawns.cow", 0));
         maxSpawns.put(Creeper.NETWORK_ID, this.pluginConfig.getInt("max-spawns.creeper", 0));
         maxSpawns.put(Enderman.NETWORK_ID, this.pluginConfig.getInt("max-spawns.enderman", 0));
@@ -96,6 +100,7 @@ public class AutoSpawnTask implements Runnable {
         maxSpawns.put(Horse.NETWORK_ID, this.pluginConfig.getInt("max-spawns.horse", 0));
         maxSpawns.put(Mooshroom.NETWORK_ID, this.pluginConfig.getInt("max-spawns.mooshroom", 0));
         maxSpawns.put(Ocelot.NETWORK_ID, this.pluginConfig.getInt("max-spawns.ocelot", 0));
+        maxSpawns.put(Parrot.NETWORK_ID, this.pluginConfig.getInt("max-spawns.parrot", 0));
         maxSpawns.put(Pig.NETWORK_ID, this.pluginConfig.getInt("max-spawns.pig", 0));
         maxSpawns.put(PolarBear.NETWORK_ID, this.pluginConfig.getInt("max-spawns.polarbear", 0));
         maxSpawns.put(Rabbit.NETWORK_ID, this.pluginConfig.getInt("max-spawns.rabbit", 0));

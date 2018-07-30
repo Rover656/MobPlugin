@@ -326,7 +326,7 @@ public abstract class BaseEntity extends EntityCreature {
         }
 
         if (this.fireTicks > 0) {
-            if (this.fireProof) {
+            if (this.fireProof || this.inWater) {
                 this.fireTicks = 0;
             } else {
                 if (!this.hasEffect(Effect.FIRE_RESISTANCE) && ((this.fireTicks % 20) == 0 || tickDiff > 20)) {
